@@ -85,10 +85,10 @@ async def log_offline_order(order_data: OfflineSaleCreate, admin: dict = Depends
         "fullName": order_data.customerName,
         "email": order_data.customerEmail or "",
         "phone": order_data.customerPhone,
-        "address": "Offline Sale",
-        "city": "Offline",
-        "pincode": "000000",
-        "state": "Offline Store"
+        "address": order_data.address or "Offline Sale",
+        "city": order_data.city or "Offline",
+        "pincode": order_data.pincode or "000000",
+        "state": order_data.state or "Offline Store"
     }
     
     cart_item = {
@@ -123,7 +123,9 @@ async def log_offline_order(order_data: OfflineSaleCreate, admin: dict = Depends
         "created_at": dt_now,
         "user_email": order_data.customerEmail or "",
         "isOffline": True,
-        "notes": order_data.notes or ""
+        "notes": order_data.notes or "",
+        "status": "confirmed",
+        "payment_status": "COD" if str(order_data.paymentMethod).lower() == "cash" else "PAID"
     }
     
     await orders_collection.insert_one(order_doc)
@@ -688,9 +690,23 @@ async def process_delhivery_shipment_booking(order_or_id, weight=500, length=15,
                 raise ValueError(f"Delhivery API responded with status {resp.status_code}: {resp.text}")
                 
             resp_json = resp.json()
+            
+            if resp_json.get("success") is False:
+                packages = resp_json.get("packages", [])
+                if packages and isinstance(packages, list):
+                    pkg = packages[0]
+                    if pkg.get("status") == "Fail":
+                        remarks = pkg.get("remarks", ["Unknown error"])
+                        raise ValueError(f"Delhivery API rejected shipment: {', '.join(remarks)}")
+                error_msg = resp_json.get("error", "Unknown Delhivery Error")
+                raise ValueError(f"Delhivery API Error: {error_msg}")
+
             packages = resp_json.get("packages", [])
             if packages and isinstance(packages, list):
                 pkg = packages[0]
+                if pkg.get("status") == "Fail":
+                    remarks = pkg.get("remarks", ["Unknown error"])
+                    raise ValueError(f"Delhivery API rejected shipment: {', '.join(remarks)}")
                 if pkg.get("waybill"):
                     waybill = pkg.get("waybill")
                     

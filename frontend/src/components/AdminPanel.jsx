@@ -74,6 +74,7 @@ import {
   scheduleDelhiveryPickup,
   cancelDelhiveryShipment,
   deleteAdminOrder,
+  adminLogOfflineSale,
   API_URL
 } from '../utils/api';
 import ConfirmModal from './ConfirmModal';
@@ -834,7 +835,11 @@ function AdminPanel({ token, onLogout, showNotification, onViewStorefront, setti
     totalPrice: 0,
     paymentMethod: 'Cash',
     created_at: new Date().toISOString().split('T')[0],
-    notes: ''
+    notes: '',
+    address: '',
+    city: '',
+    state: '',
+    pincode: ''
   });
   const [orderSourceFilter, setOrderSourceFilter] = useState('all');
   const [statsFilter, setStatsFilter] = useState('all');
@@ -853,7 +858,11 @@ function AdminPanel({ token, onLogout, showNotification, onViewStorefront, setti
       totalPrice: firstPrice,
       paymentMethod: 'Cash',
       created_at: new Date().toISOString().split('T')[0],
-      notes: ''
+      notes: '',
+      address: '',
+      city: '',
+      state: '',
+      pincode: ''
     });
     setIsOfflineSaleModalOpen(true);
   };
@@ -895,7 +904,11 @@ function AdminPanel({ token, onLogout, showNotification, onViewStorefront, setti
         totalPrice: parseFloat(offlineSaleForm.totalPrice) || 0,
         paymentMethod: offlineSaleForm.paymentMethod,
         created_at: offlineSaleForm.created_at ? new Date(offlineSaleForm.created_at).toISOString() : null,
-        notes: offlineSaleForm.notes || null
+        notes: offlineSaleForm.notes || null,
+        address: offlineSaleForm.address || null,
+        city: offlineSaleForm.city || null,
+        state: offlineSaleForm.state || null,
+        pincode: offlineSaleForm.pincode || null
       };
       await adminLogOfflineSale(payload, token);
       showNotification('Offline sale logged successfully!', 'success');
@@ -2625,17 +2638,7 @@ function AdminPanel({ token, onLogout, showNotification, onViewStorefront, setti
                                         <Trash2 className="w-3.5 h-3.5" />
                                       </button>
                                     </div>
-                                  ) : order.isOffline ? (
-                                    <div className="flex items-center justify-end gap-2">
-                                      <span className="text-[10px] text-gray-400 font-bold italic">N/A (Offline)</span>
-                                      <button
-                                        onClick={() => handleDeleteOrder(order.orderId || order._id)}
-                                        title="Delete Order Permanently"
-                                        className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors cursor-pointer border-none flex items-center justify-center shrink-0"
-                                      >
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                      </button>
-                                    </div>
+
                                   ) : order.fulfillment ? (
                                     <div className="flex flex-col items-end gap-1.5 font-sans">
                                       <div className="flex items-center gap-1.5">
@@ -7853,15 +7856,15 @@ function AdminPanel({ token, onLogout, showNotification, onViewStorefront, setti
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#3A2E26]/70 mb-1.5 font-sans">Payment Method *</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#3A2E26]/70 mb-1.5 font-sans">Payment Method</label>
                   <select
                     value={offlineSaleForm.paymentMethod}
                     onChange={(e) => setOfflineSaleForm({ ...offlineSaleForm, paymentMethod: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-[#FDFBF7] border border-[#E6D5C3]/50 rounded-2xl text-sm focus:outline-none focus:border-[#3A2E26] font-sans"
+                    className="w-full px-4 py-2.5 bg-[#FDFBF7] border border-[#E6D5C3]/50 rounded-2xl text-sm focus:outline-none focus:border-[#3A2E26] font-sans appearance-none"
                   >
                     <option value="Cash">Cash</option>
-                    <option value="UPI">UPI</option>
-                    <option value="Card">Card</option>
+                    <option value="UPI">UPI / QR Code</option>
+                    <option value="Card">Card Reader</option>
                     <option value="Other">Other</option>
                   </select>
                 </div>
@@ -7873,6 +7876,56 @@ function AdminPanel({ token, onLogout, showNotification, onViewStorefront, setti
                     onChange={(e) => setOfflineSaleForm({ ...offlineSaleForm, created_at: e.target.value })}
                     className="w-full px-4 py-2.5 bg-[#FDFBF7] border border-[#E6D5C3]/50 rounded-2xl text-sm focus:outline-none focus:border-[#3A2E26] font-sans"
                   />
+                </div>
+              </div>
+
+              <div className="border-t border-[#E6D5C3]/30 pt-4 mt-2">
+                <h4 className="text-sm font-bold text-[#3A2E26] mb-3">Shipping Details (Optional)</h4>
+                <p className="text-[10px] text-[#3A2E26]/60 mb-4 leading-tight">Fill these out if you want to use Delhivery to ship this offline order.</p>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#3A2E26]/70 mb-1.5 font-sans">Address</label>
+                    <input
+                      type="text"
+                      value={offlineSaleForm.address}
+                      onChange={(e) => setOfflineSaleForm({ ...offlineSaleForm, address: e.target.value })}
+                      placeholder="Street Address, Appt, etc."
+                      className="w-full px-4 py-2.5 bg-[#FDFBF7] border border-[#E6D5C3]/50 rounded-2xl text-sm focus:outline-none focus:border-[#3A2E26] font-sans"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#3A2E26]/70 mb-1.5 font-sans">City</label>
+                      <input
+                        type="text"
+                        value={offlineSaleForm.city}
+                        onChange={(e) => setOfflineSaleForm({ ...offlineSaleForm, city: e.target.value })}
+                        placeholder="City"
+                        className="w-full px-4 py-2.5 bg-[#FDFBF7] border border-[#E6D5C3]/50 rounded-2xl text-sm focus:outline-none focus:border-[#3A2E26] font-sans"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#3A2E26]/70 mb-1.5 font-sans">State</label>
+                      <input
+                        type="text"
+                        value={offlineSaleForm.state}
+                        onChange={(e) => setOfflineSaleForm({ ...offlineSaleForm, state: e.target.value })}
+                        placeholder="State"
+                        className="w-full px-4 py-2.5 bg-[#FDFBF7] border border-[#E6D5C3]/50 rounded-2xl text-sm focus:outline-none focus:border-[#3A2E26] font-sans"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#3A2E26]/70 mb-1.5 font-sans">Pincode</label>
+                      <input
+                        type="text"
+                        value={offlineSaleForm.pincode}
+                        onChange={(e) => setOfflineSaleForm({ ...offlineSaleForm, pincode: e.target.value })}
+                        placeholder="123456"
+                        className="w-full px-4 py-2.5 bg-[#FDFBF7] border border-[#E6D5C3]/50 rounded-2xl text-sm focus:outline-none focus:border-[#3A2E26] font-sans"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 

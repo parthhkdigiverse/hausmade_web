@@ -83,6 +83,10 @@ class OfflineSaleCreate(BaseModel):
     paymentMethod: str
     created_at: Optional[str] = None
     notes: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
 
 
 class AnnouncementSettings(BaseModel):
