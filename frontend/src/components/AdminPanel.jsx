@@ -1673,7 +1673,11 @@ function AdminPanel({ token, onLogout, showNotification, onViewStorefront, setti
   const formatDate = (dateStr) => {
     if (!dateStr) return 'N/A';
     try {
-      const date = new Date(dateStr);
+      let parseStr = dateStr;
+      if (!parseStr.endsWith('Z') && !parseStr.includes('+')) {
+        parseStr += 'Z';
+      }
+      const date = new Date(parseStr);
       if (isNaN(date.getTime())) return dateStr;
       return date.toLocaleDateString('en-IN', {
         day: '2-digit',
@@ -2615,7 +2619,7 @@ function AdminPanel({ token, onLogout, showNotification, onViewStorefront, setti
                                     {order.paymentMethod}
                                   </span>
                                 </td>
-                                <td className="p-4 align-top text-[10px] font-semibold text-[#3A2E26]/75">{formatDate(order.created_at)}</td>
+                                <td className="p-4 align-top text-[10px] font-semibold text-[#3A2E26]/75 whitespace-nowrap">{formatDate(order.created_at)}</td>
                                 <td className="p-4 align-top text-right font-bold text-sm text-[#3A2E26]">
                                   {formatCurrency(order.grandTotal)}
                                 </td>
@@ -7864,8 +7868,6 @@ function AdminPanel({ token, onLogout, showNotification, onViewStorefront, setti
                   >
                     <option value="Cash">Cash</option>
                     <option value="UPI">UPI / QR Code</option>
-                    <option value="Card">Card Reader</option>
-                    <option value="Other">Other</option>
                   </select>
                 </div>
                 <div>
