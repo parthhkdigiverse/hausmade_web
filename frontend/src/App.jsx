@@ -268,6 +268,7 @@ export default function App() {
     const timerId = setTimeout(handleHashScroll, 800);
 
     const handlePopState = () => {
+      setActiveHash(window.location.hash);
       const params = new URLSearchParams(window.location.search);
       setIsProfileOpen(params.get('view') === 'profile');
       
@@ -323,6 +324,7 @@ export default function App() {
   }, [showAdminView, currentView]);
 
   const handleNavigate = useCallback((path, hash = '') => {
+    setActiveHash(hash);
     if (path === '/admin') {
       setCurrentView('admin');
       setShowAdminView(true);
@@ -693,6 +695,7 @@ export default function App() {
                   settings={siteSettings}
                   onNavigate={handleNavigate}
                   currentView={currentView}
+                  activeHash={activeHash}
                 />
               </>
             )}

@@ -116,7 +116,6 @@ export default function Footer({ settings, onOpenPolicy, onNavigate }) {
                     onClick={(e) => {
                       e.preventDefault();
                       onNavigate('/', '#track');
-                      window.dispatchEvent(new HashChangeEvent('hashchange'));
                     }} 
                     className="hover:text-[#C97C5D] transition-colors font-semibold"
                   >

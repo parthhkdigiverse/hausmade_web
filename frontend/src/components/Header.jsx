@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShoppingBag, Menu, X, Sparkles, User } from 'lucide-react';
 
-export default function Header({ cartCount, onOpenCart, user, isAuthenticated, onLogout, onOpenLogin, onOpenOrderHistory, onOpenProfile, settings, onNavigate, currentView }) {
+export default function Header({ cartCount, onOpenCart, user, isAuthenticated, onLogout, onOpenLogin, onOpenOrderHistory, onOpenProfile, settings, onNavigate, currentView, activeHash }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -89,7 +89,8 @@ export default function Header({ cartCount, onOpenCart, user, isAuthenticated, o
           <nav className="hidden md:flex items-center space-x-10">
             {navLinks.map((link) => {
               const isShop = link.name === 'Product';
-              const isActive = (isShop && currentView === 'products') || (!isShop && currentView === 'home' && window.location.hash === link.href);
+              const isTrack = link.href === '#track';
+              const isActive = (isShop && currentView === 'products') || (isTrack && activeHash === '#track') || (!isShop && !isTrack && currentView === 'home' && (activeHash ? activeHash === link.href : window.location.hash === link.href));
               return (
                 <a
                   key={link.name}
@@ -100,7 +101,6 @@ export default function Header({ cartCount, onOpenCart, user, isAuthenticated, o
                       onNavigate('/products');
                     } else if (link.href === '#track') {
                       onNavigate('/', '#track');
-                      window.dispatchEvent(new HashChangeEvent('hashchange'));
                     } else {
                       onNavigate('/', link.href);
                     }
@@ -199,7 +199,8 @@ export default function Header({ cartCount, onOpenCart, user, isAuthenticated, o
             <div className="flex flex-col space-y-1">
               {navLinks.map((link) => {
                 const isShop = link.name === 'Product';
-                const isActive = (isShop && currentView === 'products') || (!isShop && currentView === 'home' && window.location.hash === link.href);
+                const isTrack = link.href === '#track';
+                const isActive = (isShop && currentView === 'products') || (isTrack && activeHash === '#track') || (!isShop && !isTrack && currentView === 'home' && (activeHash ? activeHash === link.href : window.location.hash === link.href));
                 return (
                   <a
                     key={link.name}
@@ -211,7 +212,6 @@ export default function Header({ cartCount, onOpenCart, user, isAuthenticated, o
                         onNavigate('/products');
                       } else if (link.href === '#track') {
                         onNavigate('/', '#track');
-                        window.dispatchEvent(new HashChangeEvent('hashchange'));
                       } else {
                         onNavigate('/', link.href);
                       }

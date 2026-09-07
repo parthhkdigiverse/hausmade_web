@@ -7,58 +7,7 @@ export default function Reviews({ settings }) {
   const headerTitle = settings?.reviews_header?.title || settings?.reviews?.title || "What Our Customers Say";
   const ratingSubtext = settings?.reviews_header?.rating_subtext || settings?.reviews?.rating_subtext || "4.9 / 5 · Verified by Google · 2,400+ reviews";
 
-  const staticReviews = [
-    {
-      id: 'static-1',
-      name: 'Roselin Mogaria',
-      initial: 'R',
-      rating: 5,
-      verified: 'Google Verified',
-      comment: '"Nice design. Must visit here . Good staff service"'
-    },
-    {
-      id: 'static-2',
-      name: 'Sarah M.',
-      initial: 'S',
-      rating: 5,
-      verified: 'Verified Bather',
-      comment: '"Saved my sensitive winter skin! Switching to the 3-pack of lavender oat soap transformed my shower routine. Creamy lather!"'
-    },
-    {
-      id: 'static-3',
-      name: 'David K.',
-      initial: 'D',
-      rating: 5,
-      verified: 'Verified Bather',
-      comment: '"Lasts twice as long as store soap. One bar lasted me nearly 4 weeks in the shower. The Subscribe & Save option is great."'
-    },
-    {
-      id: 'static-4',
-      name: 'Elena P.',
-      initial: 'E',
-      rating: 5,
-      verified: 'Verified Buyer',
-      comment: '"Absolutely love the sandalwood aroma. It fills the whole bathroom without being overpowering. Skin feels amazingly soft!"'
-    },
-    {
-      id: 'static-5',
-      name: 'Michael T.',
-      initial: 'M',
-      rating: 5,
-      verified: 'Google Verified',
-      comment: '"Best soap I’ve ever used. The lather is insanely rich and it doesn’t dry my skin out like normal bar soaps do."'
-    },
-    {
-      id: 'static-6',
-      name: 'Priya R.',
-      initial: 'P',
-      rating: 5,
-      verified: 'Verified Bather',
-      comment: '"The kesar infusion genuinely brightened my skin tone over a few weeks. So luxurious and totally worth the price."'
-    }
-  ];
-
-  const [reviewsList, setReviewsList] = useState(staticReviews);
+  const [reviewsList, setReviewsList] = useState([]);
   const [editingReviewId, setEditingReviewId] = useState(() => localStorage.getItem('hausmade_editing_review_id'));
   const [editingReviewData, setEditingReviewData] = useState(() => {
     const data = localStorage.getItem('hausmade_editing_review_data');
@@ -190,19 +139,13 @@ export default function Reviews({ settings }) {
               comment: cleanComment
             };
           });
-          if (formatted.length < 6) {
-            const needed = 6 - formatted.length;
-            const remaining = staticReviews.slice(formatted.length, formatted.length + needed);
-            setReviewsList([...formatted, ...remaining]);
-          } else {
-            setReviewsList(formatted);
-          }
+          setReviewsList(formatted);
         } else {
-          setReviewsList(staticReviews);
+          setReviewsList([]);
         }
       } catch (err) {
         console.error('Failed to load dynamic reviews:', err);
-        setReviewsList(staticReviews);
+        setReviewsList([]);
       }
     }
     loadReviews();
@@ -278,16 +221,21 @@ export default function Reviews({ settings }) {
         </div>
 
         {/* Coverflow Container */}
-        <div 
-          className="relative w-full h-[380px] sm:h-[450px] flex justify-center items-center overflow-hidden max-w-[1400px] mx-auto py-8 cursor-grab active:cursor-grabbing"
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEndHandler}
-          onMouseDown={onMouseDown}
-          onMouseMove={onMouseMove}
-          onMouseUp={onMouseUp}
-          onMouseLeave={onMouseLeave}
-        >
+        {finalReviews.length === 0 ? (
+          <div className="text-center py-12 px-4">
+            <p className="text-[#3A2E26]/60 text-sm font-medium">No reviews yet. Be the first to share your experience!</p>
+          </div>
+        ) : (
+          <div 
+            className="relative w-full h-[380px] sm:h-[450px] flex justify-center items-center overflow-hidden max-w-[1400px] mx-auto py-8 cursor-grab active:cursor-grabbing"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEndHandler}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={onMouseUp}
+            onMouseLeave={onMouseLeave}
+          >
           {finalReviews.map((rev, idx) => {
             const style = getCardStyle(idx, finalReviews.length);
             return (
@@ -331,6 +279,7 @@ export default function Reviews({ settings }) {
             );
           })}
         </div>
+        )}
       </div>
     </section>
   );
