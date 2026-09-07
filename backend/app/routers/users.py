@@ -128,7 +128,7 @@ async def update_profile(user_data: UserUpdate, current_user_email: str = Depend
 
 @router.get("/api/admin/stats")
 async def get_admin_stats(admin: dict = Depends(get_admin_user)):
-    orders = await orders_collection.find({}).to_list(length=None)
+    orders = await orders_collection.find({"status": {"$ne": "pending_payment"}}).to_list(length=None)
     users = await users_collection.find({}).to_list(length=None)
     
     total_revenue = 0.0
@@ -186,7 +186,7 @@ async def get_admin_recent_users(admin: dict = Depends(get_admin_user)):
 
 @router.get("/api/admin/orders")
 async def get_admin_orders(admin: dict = Depends(get_admin_user)):
-    orders = await orders_collection.find({}).to_list(length=None)
+    orders = await orders_collection.find({"status": {"$ne": "pending_payment"}}).to_list(length=None)
     for order in orders:
         order["_id"] = str(order["_id"])
     try:
@@ -197,7 +197,7 @@ async def get_admin_orders(admin: dict = Depends(get_admin_user)):
 
 @router.get("/api/admin/subscriptions")
 async def get_admin_subscriptions(admin: dict = Depends(get_admin_user)):
-    orders = await orders_collection.find({}).to_list(length=None)
+    orders = await orders_collection.find({"status": {"$ne": "pending_payment"}}).to_list(length=None)
     subscriptions = []
     for o in orders:
         cart_items = o.get("cartItems", [])

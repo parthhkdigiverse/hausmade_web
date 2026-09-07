@@ -25,11 +25,12 @@ async def place_order(order_data: OrderCreate, current_user_email: Optional[str]
                     detail=f"Insufficient stock for {prod.get('title')}. Available stock: {current_stock}"
                 )
     
-    for item in order_data.cartItems:
-        prod = await products_collection.find_one({"id": item.packId})
-        if prod:
-            new_stock = max(0, prod.get("stock", 0) - item.quantity)
-            await products_collection.update_one({"id": item.packId}, {"$set": {"stock": new_stock}})
+    if order_data.paymentMethod in ["cod", "offline"]:
+        for item in order_data.cartItems:
+            prod = await products_collection.find_one({"id": item.packId})
+            if prod:
+                new_stock = max(0, prod.get("stock", 0) - item.quantity)
+                await products_collection.update_one({"id": item.packId}, {"$set": {"stock": new_stock}})
 
     # Auto-link or auto-create guest user
     email_to_use = current_user_email
@@ -165,6 +166,9 @@ async def get_orders(current_user_email: str = Depends(get_current_user_email)):
             ]
         }
     
+    # Exclude pending_payment orders from user view
+    query = {"$and": [query, {"status": {"$ne": "pending_payment"}}]}
+    
     orders = await orders_collection.find(query).to_list(length=None)
     for order in orders:
         order["_id"] = str(order["_id"])
@@ -173,7 +177,7 @@ async def get_orders(current_user_email: str = Depends(get_current_user_email)):
 @router.get("/api/public/recent-orders")
 async def get_recent_public_orders():
     try:
-        orders = await orders_collection.find({}).to_list(length=None)
+        orders = await orders_collection.find({"status": {"$ne": "pending_payment"}}).to_list(length=None)
         orders.sort(key=lambda x: x.get("created_at", ""), reverse=True)
         orders = orders[:15]
         
@@ -341,6 +345,20 @@ async def verify_payment(payload: dict):
                         "status": new_status
                     }}
                 )
+                
+                if order_status == "PAID" and db_order.get("status") == "pending_payment":
+                    for item in db_order.get("cartItems", []):
+                        prod = await products_collection.find_one({"id": item.get("packId")})
+                        if prod:
+                            new_stock = max(0, prod.get("stock", 0) - item.get("quantity", 1))
+                            await products_collection.update_one({"id": item.get("packId")}, {"$set": {"stock": new_stock}})
+                    
+                    if db_order.get("isSubscriptionOrder"):
+                        from app.database.connection import subscriptions_collection
+                        await subscriptions_collection.update_one(
+                            {"subscriptionId": db_order.get("subscriptionId")},
+                            {"$set": {"status": "active"}}
+                        )
             
             return {
                 "order_status": order_status,
@@ -473,6 +491,21 @@ async def verify_razorpay_payment(payload: dict):
                 "razorpay_order_id": razorpay_order_id
             }}
         )
+        
+        if is_valid and db_order.get("status") == "pending_payment":
+            # Deduct stock on successful payment
+            for item in db_order.get("cartItems", []):
+                prod = await products_collection.find_one({"id": item.get("packId")})
+                if prod:
+                    new_stock = max(0, prod.get("stock", 0) - item.get("quantity", 1))
+                    await products_collection.update_one({"id": item.get("packId")}, {"$set": {"stock": new_stock}})
+            
+            if db_order.get("isSubscriptionOrder"):
+                from app.database.connection import subscriptions_collection
+                await subscriptions_collection.update_one(
+                    {"subscriptionId": db_order.get("subscriptionId")},
+                    {"$set": {"status": "active"}}
+                )
         
     if not is_valid:
         raise HTTPException(status_code=400, detail="Invalid Razorpay signature")

@@ -178,6 +178,11 @@ async def create_subscription(sub_data: SubscriptionCreate, current_user_email: 
         
     next_del_date = now + timedelta(days=days_to_next)
     
+    if sub_data.paymentMethod in ["cod", "offline", "Cash on Delivery", "COD"]:
+        sub_status = "active"
+    else:
+        sub_status = "pending_payment"
+
     sub_doc = {
         "subscriptionId": sub_id,
         "user_email": email_to_use,
@@ -189,7 +194,7 @@ async def create_subscription(sub_data: SubscriptionCreate, current_user_email: 
         "deliveryFrequency": freq,
         "shippingAddress": sub_data.shippingAddress.dict(),
         "paymentMethod": sub_data.paymentMethod,
-        "status": "active",
+        "status": sub_status,
         "created_at": now,
         "next_delivery_date": next_del_date,
         "remaining_deliveries": total_deliveries - 1, # First order is generated immediately
@@ -245,7 +250,9 @@ async def create_subscription(sub_data: SubscriptionCreate, current_user_email: 
         "created_at": now,
         "user_email": email_to_use,
         "isSubscriptionOrder": True,
-        "subscriptionId": sub_id
+        "subscriptionId": sub_id,
+        "status": sub_status,
+        "payment_status": "COD" if sub_status == "active" else "PENDING"
     }
     
     await orders_collection.insert_one(order_doc)
