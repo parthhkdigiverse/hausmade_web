@@ -28,6 +28,7 @@ import SocialProofToast from './components/SocialProofToast';
 import StickyMobileBar from './components/StickyMobileBar';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Sparkles, X } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 
 
@@ -718,6 +719,29 @@ export default function App() {
                 <OrderTracking />
               ) : (
                 <>
+                  <Helmet>
+                    {/* Primary SEO Tags */}
+                    <title>Handmade Natural Soaps & Skincare Products | Hausmade</title>
+                    <meta name="description" content="Explore Hausmade's collection of handcrafted natural soaps and skincare products, made with carefully selected ingredients for a gentle and refreshing everyday experience." />
+                    <meta name="robots" content="index, follow, max-image-preview:large" />
+                    <link rel="canonical" href="https://hausmade.in/" />
+
+                    {/* Open Graph Tags */}
+                    <meta property="og:type" content="website" />
+                    <meta property="og:title" content="Handmade Natural Soaps & Skincare Products | Hausmade" />
+                    <meta property="og:description" content="Explore Hausmade's collection of handcrafted natural soaps and skincare products, made with carefully selected ingredients for a gentle and refreshing everyday experience." />
+                    <meta property="og:url" content="https://hausmade.in/" />
+                    <meta property="og:site_name" content="Hausmade" />
+                    <meta property="og:image" content="https://hausmade.in/SEO_Image.jpeg" />
+                    <meta property="og:image:alt" content="Hausmade Handmade Natural Soaps and Skincare Products" />
+                    <meta property="og:locale" content="en_IN" />
+
+                    {/* Twitter / X Tags */}
+                    <meta name="twitter:card" content="summary_large_image" />
+                    <meta name="twitter:title" content="Handmade Natural Soaps & Skincare Products | Hausmade" />
+                    <meta name="twitter:description" content="Explore Hausmade's collection of handcrafted natural soaps and skincare products, made with carefully selected ingredients for a gentle and refreshing everyday experience." />
+                    <meta name="twitter:image" content="https://hausmade.in/SEO_Image.jpeg" />
+                  </Helmet>
                   {shouldShowSection('hero') && (
                     <div id="hero" className={getSectionClass('hero')} onClick={() => handleSectionClick('hero')}>
                       <Hero settings={{ ...siteSettings.hero, trust_badges: siteSettings.trust_badges, social_links: siteSettings.social_links, contact: siteSettings.contact }} onNavigate={handleNavigate} />
