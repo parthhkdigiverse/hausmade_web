@@ -236,6 +236,25 @@ function ImageUploader({ label, value, onChange, showNotification, isSaving, set
   );
 }
 
+const cleanHtmlToPlainText = (html) => {
+  if (!html) return '';
+  if (!html.includes('<')) return html;
+  try {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const liElements = doc.querySelectorAll('li');
+    if (liElements.length > 0) {
+      return Array.from(liElements).map(el => el.textContent.trim()).join('\n');
+    }
+    const pElements = doc.querySelectorAll('p');
+    if (pElements.length > 0) {
+      return Array.from(pElements).map(el => el.textContent.trim()).join('\n');
+    }
+    return doc.body.textContent.trim();
+  } catch (e) {
+    return html.replace(/<[^>]*>/g, '').trim();
+  }
+};
+
 function AdminPanel({ token, onLogout, showNotification, onViewStorefront, settings, onUpdateSettings }) {
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('hausmade_admin_active_tab') || 'overview';
@@ -363,7 +382,37 @@ function AdminPanel({ token, onLogout, showNotification, onViewStorefront, setti
     product_selector_images: [
       { src: "/images/soap-hero.png", alt: "Hausmade Kesar Soap Single Box" },
       { src: "/images/founder-workshop.png", alt: "Artisan Workshop Studio" }
-    ]
+    ],
+    product_details: {
+      title: 'The Hausmade Difference',
+      subtitle: 'Everything you need to know about our Kesar Soap.',
+      items: [
+        {
+          id: 'benefits',
+          title: 'Benefits',
+          format: 'bullet',
+          content: 'Suitable for all skin types.\nSoft touch & deep nourishment.\n100% natural botanical ingredients.\nNaturally removes sun tan and fades dark spots.\nBrightens complexion for a radiant daily glow.'
+        },
+        {
+          id: 'ingredients',
+          title: 'Ingredients',
+          format: 'paragraph',
+          content: 'Kesar (Saffron): Sourced directly from Kashmir, Kesar is renowned for its skin-brightening and anti-inflammatory properties.\nCamphor: Adds a cooling, soothing effect that calms irritated skin and clears pores.\n100% Coconut Oil: Creates a rich, creamy lather that cleanses deeply while locking in essential moisture.'
+        },
+        {
+          id: 'usage',
+          title: 'How to use',
+          format: 'number',
+          content: 'Wet your skin and rub the soap directly onto your body to create a rich lather.\nGently massage the lather into your skin in circular motions.\nRinse thoroughly with water and pat dry.'
+        },
+        {
+          id: 'who',
+          title: 'Who is it for?',
+          format: 'paragraph',
+          content: 'Suitable for all skin types, including dry, sensitive, or sun-damaged skin. Designed for anyone seeking a pure, chemical-free bathing experience.'
+        }
+      ]
+    }
   });
   const [isInstaModalOpen, setIsInstaModalOpen] = useState(false);
   const [editingInstaIdx, setEditingInstaIdx] = useState(null);
@@ -438,6 +487,7 @@ function AdminPanel({ token, onLogout, showNotification, onViewStorefront, setti
         JSON.stringify(currentDelhivery) !== JSON.stringify(newDelhivery) ||
         JSON.stringify(currentProductSelectorHeader) !== JSON.stringify(newProductSelectorHeader) ||
         JSON.stringify(settingsForm.product_selector_images || []) !== JSON.stringify(settings.product_selector_images || []) ||
+        JSON.stringify(settingsForm.product_details || {}) !== JSON.stringify(settings.product_details || {}) ||
         settingsForm.subscription_discount_pct !== (settings.subscription_discount_pct !== undefined ? settings.subscription_discount_pct : 15.0) ||
         settingsForm.subscription_active !== (settings.subscription_active !== undefined ? settings.subscription_active : true) ||
         JSON.stringify(settingsForm.subscription_durations || []) !== JSON.stringify(settings.subscription_durations || []) ||
@@ -576,7 +626,43 @@ function AdminPanel({ token, onLogout, showNotification, onViewStorefront, setti
           product_selector_images: settings.product_selector_images || [
             { src: "/images/soap-hero.png", alt: "Hausmade Kesar Soap Single Box" },
             { src: "/images/founder-workshop.png", alt: "Artisan Workshop Studio" }
-          ]
+          ],
+          product_details: settings.product_details ? {
+            ...settings.product_details,
+            items: (settings.product_details.items || []).map(item => ({
+              ...item,
+              content: cleanHtmlToPlainText(item.content)
+            }))
+          } : {
+            title: 'The Hausmade Difference',
+            subtitle: 'Everything you need to know about our Kesar Soap.',
+            items: [
+              {
+                id: 'benefits',
+                title: 'Benefits',
+                format: 'bullet',
+                content: 'Suitable for all skin types.\nSoft touch & deep nourishment.\n100% natural botanical ingredients.\nNaturally removes sun tan and fades dark spots.\nBrightens complexion for a radiant daily glow.'
+              },
+              {
+                id: 'ingredients',
+                title: 'Ingredients',
+                format: 'paragraph',
+                content: 'Kesar (Saffron): Sourced directly from Kashmir, Kesar is renowned for its skin-brightening and anti-inflammatory properties.\nCamphor: Adds a cooling, soothing effect that calms irritated skin and clears pores.\n100% Coconut Oil: Creates a rich, creamy lather that cleanses deeply while locking in essential moisture.'
+              },
+              {
+                id: 'usage',
+                title: 'How to use',
+                format: 'number',
+                content: 'Wet your skin and rub the soap directly onto your body to create a rich lather.\nGently massage the lather into your skin in circular motions.\nRinse thoroughly with water and pat dry.'
+              },
+              {
+                id: 'who',
+                title: 'Who is it for?',
+                format: 'paragraph',
+                content: 'Suitable for all skin types, including dry, sensitive, or sun-damaged skin. Designed for anyone seeking a pure, chemical-free bathing experience.'
+              }
+            ]
+          }
         });
       }
     }
@@ -4036,6 +4122,136 @@ function AdminPanel({ token, onLogout, showNotification, onViewStorefront, setti
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-3xl p-6 border border-[#3A2E26]/10 shadow-sm space-y-4 mt-6">
+                    <div className="flex justify-between items-center border-b border-[#3A2E26]/10 pb-2">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-[#3A2E26]/70">Product Details (Accordion)</h3>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = settingsForm.product_details?.items || [];
+                          setSettingsForm({
+                            ...settingsForm,
+                            product_details: {
+                              ...settingsForm.product_details,
+                              items: [...current, { id: 'new-' + Date.now(), title: 'New Item', content: '' }]
+                            }
+                          });
+                        }}
+                        className="px-3.5 py-1.5 bg-[#7A8B6F] hover:bg-[#68785c] text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1 shrink-0 border-none"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Add Accordion Item
+                      </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#3A2E26]/70 mb-1.5">Section Title</label>
+                        <input
+                          type="text"
+                          value={settingsForm.product_details?.title || ''}
+                          onChange={(e) => setSettingsForm({
+                            ...settingsForm,
+                            product_details: { ...settingsForm.product_details, title: e.target.value }
+                          })}
+                          className="w-full px-4 py-2.5 bg-[#FDFBF7] border border-[#E6D5C3]/50 rounded-2xl text-sm focus:outline-none focus:border-[#3A2E26]"
+                          placeholder="e.g. The Hausmade Difference"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#3A2E26]/70 mb-1.5">Section Subtitle</label>
+                        <input
+                          type="text"
+                          value={settingsForm.product_details?.subtitle || ''}
+                          onChange={(e) => setSettingsForm({
+                            ...settingsForm,
+                            product_details: { ...settingsForm.product_details, subtitle: e.target.value }
+                          })}
+                          className="w-full px-4 py-2.5 bg-[#FDFBF7] border border-[#E6D5C3]/50 rounded-2xl text-sm focus:outline-none focus:border-[#3A2E26]"
+                          placeholder="e.g. Everything you need to know about our Kesar Soap."
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 mt-4">
+                      {(settingsForm.product_details?.items || []).map((item, idx) => (
+                        <div key={idx} className="flex flex-col gap-4 p-4 bg-[#F5F1E8]/30 rounded-2xl border border-[#E6D5C3]/30">
+                          <div className="flex justify-between items-center">
+                             <label className="block text-xs font-bold uppercase tracking-wider text-[#3A2E26]/70">Item {idx + 1}</label>
+                             <button
+                                type="button"
+                                onClick={() => {
+                                  const newItems = settingsForm.product_details.items.filter((_, i) => i !== idx);
+                                  setSettingsForm({
+                                    ...settingsForm,
+                                    product_details: { ...settingsForm.product_details, items: newItems }
+                                  });
+                                }}
+                                className="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0 border-none bg-transparent"
+                              >
+                                <Trash2 className="w-4.5 h-4.5" />
+                             </button>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-bold uppercase tracking-wider text-[#3A2E26]/70 mb-1.5 font-sans">Title</label>
+                              <input
+                                type="text"
+                                value={item.title || ''}
+                                onChange={(e) => {
+                                  const newItems = [...settingsForm.product_details.items];
+                                  newItems[idx].title = e.target.value;
+                                  setSettingsForm({
+                                    ...settingsForm,
+                                    product_details: { ...settingsForm.product_details, items: newItems }
+                                  });
+                                }}
+                                className="w-full px-4 py-2.5 bg-white border border-[#E6D5C3]/50 rounded-2xl text-sm focus:outline-none focus:border-[#3A2E26] font-sans"
+                                placeholder="e.g. Benefits"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold uppercase tracking-wider text-[#3A2E26]/70 mb-1.5 font-sans">Format</label>
+                              <select
+                                value={item.format || 'paragraph'}
+                                onChange={(e) => {
+                                  const newItems = [...settingsForm.product_details.items];
+                                  newItems[idx].format = e.target.value;
+                                  setSettingsForm({
+                                    ...settingsForm,
+                                    product_details: { ...settingsForm.product_details, items: newItems }
+                                  });
+                                }}
+                                className="w-full px-4 py-2.5 bg-white border border-[#E6D5C3]/50 rounded-2xl text-sm focus:outline-none focus:border-[#3A2E26] font-sans"
+                              >
+                                <option value="bullet">Bullet Points</option>
+                                <option value="number">Numbered List</option>
+                                <option value="paragraph">Paragraphs</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-[#3A2E26]/70 mb-1.5 font-sans">Content (Line by Line)</label>
+                            <AutoResizeTextarea
+                              value={item.content || ''}
+                              onChange={(e) => {
+                                const newItems = [...settingsForm.product_details.items];
+                                newItems[idx].content = e.target.value;
+                                setSettingsForm({
+                                  ...settingsForm,
+                                  product_details: { ...settingsForm.product_details, items: newItems }
+                                });
+                              }}
+                              className="w-full px-4 py-2.5 bg-white border border-[#E6D5C3]/50 rounded-2xl text-sm focus:outline-none focus:border-[#3A2E26] font-sans"
+                              placeholder="Enter text line by line..."
+                              rows={4}
+                            />
+                          </div>
                         </div>
                       ))}
                     </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 import ProductSelector, { PACK_OPTIONS } from './ProductSelector';
+import ProductDetails from './ProductDetails';
 
 export default function ProductsPage({
   products = [],
@@ -56,6 +57,9 @@ export default function ProductsPage({
           settings={settings}
         />
       </div>
+
+      {/* Product Deep Dive / Details */}
+      <ProductDetails settings={settings} />
 
 
     </div>

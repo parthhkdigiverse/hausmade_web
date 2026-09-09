@@ -167,6 +167,42 @@ class ProductSelectorHeaderSettings(BaseModel):
     rating_text: str = "4.9 ★ · 480+ Happy Glow Reviews"
     product_description: str = "A purely handmade cleansing bar infused with real saffron extract, camphor, and 100% coconut oil. Helps remove sun tanning, fade dark spots, and deeply nourish skin for natural daily glow care. Suitable for all skins."
 
+class ProductDetailAccordionItem(BaseModel):
+    id: str
+    title: str
+    content: str
+    format: str = "bullet" # "bullet", "number", "paragraph"
+
+class ProductDetailsSettings(BaseModel):
+    title: str = "The Hausmade Difference"
+    subtitle: str = "Everything you need to know about our Kesar Soap."
+    items: List[ProductDetailAccordionItem] = [
+        ProductDetailAccordionItem(
+            id="benefits",
+            title="Benefits",
+            format="bullet",
+            content="Suitable for all skin types.\nSoft touch & deep nourishment.\n100% natural botanical ingredients.\nNaturally removes sun tan and fades dark spots.\nBrightens complexion for a radiant daily glow."
+        ),
+        ProductDetailAccordionItem(
+            id="ingredients",
+            title="Ingredients",
+            format="paragraph",
+            content="Kesar (Saffron): Sourced directly from Kashmir, Kesar is renowned for its skin-brightening and anti-inflammatory properties.\nCamphor: Adds a cooling, soothing effect that calms irritated skin and clears pores.\n100% Coconut Oil: Creates a rich, creamy lather that cleanses deeply while locking in essential moisture."
+        ),
+        ProductDetailAccordionItem(
+            id="usage",
+            title="How to use",
+            format="number",
+            content="Wet your skin and rub the soap directly onto your body to create a rich lather.\nGently massage the lather into your skin in circular motions.\nRinse thoroughly with water and pat dry."
+        ),
+        ProductDetailAccordionItem(
+            id="who",
+            title="Who is it for?",
+            format="paragraph",
+            content="Suitable for all skin types, including dry, sensitive, or sun-damaged skin. Designed for anyone seeking a pure, chemical-free bathing experience."
+        )
+    ]
+
 class ProductSelectorImageItem(BaseModel):
     src: str
     alt: Optional[str] = "Hausmade Soap Gallery Image"
@@ -318,6 +354,7 @@ class SiteSettingsModel(BaseModel):
     policies_shipping: Optional[str] = ""
     policies_refund: Optional[str] = ""
     product_selector_header: Optional[ProductSelectorHeaderSettings] = ProductSelectorHeaderSettings()
+    product_details: Optional[ProductDetailsSettings] = ProductDetailsSettings()
     product_selector_images: List[ProductSelectorImageItem] = []
 
 class ReviewSubmitModel(BaseModel):

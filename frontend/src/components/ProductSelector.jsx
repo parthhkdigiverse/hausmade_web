@@ -125,9 +125,9 @@ export default function ProductSelector({ products = [], onAddToCart, onBuyNow, 
         
         <div className="text-center max-w-3xl mx-auto mb-12">
           <span className="text-[#C97C5D] font-bold text-xs uppercase tracking-widest">{headerSettings.badge || "CHOOSE YOUR RITUAL"}</span>
-          <h2 className="font-serif-brand text-2xl sm:text-4xl lg:text-5xl font-normal text-[#3A2E26] mt-2">
+          <h1 className="font-serif-brand text-2xl sm:text-4xl lg:text-5xl font-normal text-[#3A2E26] mt-2">
             {headerSettings.title || "Select Your Artisanal Cleansing Ritual"}
-          </h2>
+          </h1>
           <p className="text-[#3A2E26]/70 mt-3 text-base sm:text-lg">
             {headerSettings.description || "Handcrafted with pure saffron extract (Kesar), aromatic camphor, and cold-pressed coconut oil. Choose a larger pack size to enjoy significant savings."}
           </p>
@@ -181,9 +181,9 @@ export default function ProductSelector({ products = [], onAddToCart, onBuyNow, 
                     {headerSettings.weight_badge || "75g Bar"}
                   </span>
                 </div>
-                <h3 className="font-serif-brand text-4xl sm:text-5xl font-normal text-[#3A2E26] mt-6 leading-tight">
+                <h1 className="font-serif-brand text-4xl sm:text-5xl font-normal text-[#3A2E26] mt-6 leading-tight">
                   {headerSettings.product_title || "Hausmade™ Kesar Soap"}
-                </h3>
+                </h1>
               </div>
 
               {/* Star Rating summary */}
