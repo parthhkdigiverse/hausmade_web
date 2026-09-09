@@ -156,7 +156,8 @@ export default function Hero({ settings, onNavigate }) {
              let num = (settings?.social_links?.whatsapp || "").replace(/[^0-9]/g, '');
              if (!num) return null;
              if (num.length === 10) num = '91' + num;
-             const waUrl = `https://api.whatsapp.com/send/?phone=${num}&text=Hi,+I'm+stuck+on+choosing+a+Hausmade+product+-+need+support&type=phone_number&app_absent=0`;
+             const message = "Hi, I'm interested in Hausmade Kesar Soap. Could you please help me with the product details and benefits?";
+             const waUrl = `https://api.whatsapp.com/send/?phone=${num}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
              return (
                <a 
                   href={waUrl}

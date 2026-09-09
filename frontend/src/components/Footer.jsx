@@ -168,7 +168,8 @@ export default function Footer({ settings, onOpenPolicy, onNavigate }) {
                 if (num && num.length === 10) num = '91' + num;
                 if (!num) return null;
                 
-                const waUrl = `https://api.whatsapp.com/send/?phone=${num}&text=Hi,+I'm+stuck+on+choosing+a+Hausmade+product+-+need+support&type=phone_number&app_absent=0`;
+                const message = "Hi, I'm interested in Hausmade Kesar Soap. Could you please help me with the product details and benefits?";
+                const waUrl = `https://api.whatsapp.com/send/?phone=${num}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
                 
                 return (
                   <a href={waUrl} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white/10 hover:bg-[#C97C5D] rounded-full transition-all duration-300 text-white hover:scale-110" aria-label="WhatsApp">
